@@ -23,8 +23,16 @@ int main() {
         tasks.emplace_back(i,i,i);
     }
 
+    // Affichage des tâches
+    cout << "Tâche | rj | wj | pj" << endl;
+    int i = 0;
+    for (Task task:tasks) {
+        cout << " "<<i++<<"   | " << task.r << " | " << task.w << " | " << task.p << endl;
+    }
+
     // calcul de l'heuristique
     h->predict(m1, m2, tasks);
+    delete h;
 
     //Affichage des machines
     cout << "M1:" << m1 << endl;
