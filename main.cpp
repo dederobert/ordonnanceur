@@ -4,6 +4,7 @@
 #include "struct/Machine.hpp"
 #include "heuristique/Heuristique.hpp"
 #include "heuristique/HeuristiqueNaif.hpp"
+#include "heuristique/HeuristiqueTriePJWJ.hpp"
 
 #define NB_TACHE 10
 
@@ -15,12 +16,20 @@ int main() {
     Heuristique* h;
 
     // Choix de l'heuristique (A CHANGER)
-    h = new HeuristiqueNaif();
+    h = new HeuristiqueTriePJWJ();
 
     // Créations de NB_TACHE taches
     std::vector<Task> tasks;
-    for (int i = 0; i < NB_TACHE; ++i) {
-        tasks.emplace_back(i,i,i);
+    {
+        tasks.emplace_back(1,3,3,2);
+        tasks.emplace_back(2,2,6,10);
+        tasks.emplace_back(3,1,0,1);
+        tasks.emplace_back(4,9,10,2);
+        tasks.emplace_back(5,1,18,5);
+        tasks.emplace_back(6,17,5,4);
+        tasks.emplace_back(7,6,2,1);
+        tasks.emplace_back(8,10,3,6);
+        tasks.emplace_back(9,5,8,8);
     }
 
     // Affichage des tâches
