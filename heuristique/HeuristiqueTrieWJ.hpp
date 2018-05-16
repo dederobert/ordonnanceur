@@ -4,20 +4,19 @@
 
 #include <algorithm>
 #include "Heuristique.hpp"
-#include <Utils.hpp>
 
-#ifndef PROJET_HEURISTIQUETRIEPJWJ_HPP
-#define PROJET_HEURISTIQUETRIEPJWJ_HPP
+#ifndef PROJET_HEURISTIQUETRIEWJ_HPP
+#define PROJET_HEURISTIQUETRIEWJ_HPP
 
-class HeuristiqueTriePJWJ:
-public Heuristique{
+class HeuristiqueTrieWJ:
+        public Heuristique{
     void predict(Machine& m1, Machine& m2, const std::vector<Task>& tasks) const override {
 
         std::vector<Task> wtasks = tasks;
 
         // On trie les tâches selont l'ordre pj*wj décroissant
         std::sort(wtasks.begin(), wtasks.end(), [](Task a, Task b){
-            return a.p*a.w < b.p*b.w;
+            return a.w < b.w;
         });
 
         putTaskOnMachine(m1, m2, wtasks);

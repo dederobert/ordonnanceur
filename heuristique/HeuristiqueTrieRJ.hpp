@@ -1,27 +1,24 @@
-//
-// Created by dede on 21/04/18.
-//
+#pragma once
 
 #include <algorithm>
 #include "Heuristique.hpp"
 #include <Utils.hpp>
 
-#ifndef PROJET_HEURISTIQUETRIEPJWJ_HPP
-#define PROJET_HEURISTIQUETRIEPJWJ_HPP
+#ifndef PROJET_HEURISTIQUETRIERJ_HPP
+#define PROJET_HEURISTIQUETRIERJ_HPP
 
-class HeuristiqueTriePJWJ:
-public Heuristique{
+class HeuristiqueTrieRJ :
+        public Heuristique {
     void predict(Machine& m1, Machine& m2, const std::vector<Task>& tasks) const override {
 
         std::vector<Task> wtasks = tasks;
 
         // On trie les tâches selont l'ordre pj*wj décroissant
-        std::sort(wtasks.begin(), wtasks.end(), [](Task a, Task b){
-            return a.p*a.w < b.p*b.w;
+        std::sort(wtasks.begin(), wtasks.end(), [](Task a, Task b) {
+            return a.r < b.r;
         });
 
         putTaskOnMachine(m1, m2, wtasks);
-
 
         // On test si il y a un wait sur m1 et on décalle
         if (m1.isWaiting())
@@ -33,4 +30,4 @@ public Heuristique{
     }
 };
 
-#endif //PROJET_HEURISTIQUETRIEPJWJ_HPP
+#endif //PROJET_HEURISTIQUETRIERJ_HPP

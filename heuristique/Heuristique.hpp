@@ -5,7 +5,7 @@
 #ifndef PROJET_HEURISTIQUE_HPP
 #define PROJET_HEURISTIQUE_HPP
 
-#include "../struct/Machine.hpp"
+#include <Machine.hpp>
 
 // Classe générique pour les heuristiques
 class Heuristique {

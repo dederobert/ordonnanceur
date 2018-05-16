@@ -39,7 +39,7 @@ public:
         int taskStartDate = (task.r >= end)? task.r:end;
         std::tuple<int, int, Task> ttask(taskStartDate,taskStartDate+task.p, task);
         tasks.push_back(ttask);
-        end += taskStartDate+task.p;
+        end = taskStartDate+task.p;
         sumCjWj += task.w*end;
         return *this;
     }
@@ -61,11 +61,11 @@ public:
     }
 
     bool isWaiting() const {
-        return maxWaitingTime()!=0;
+        return sumWaitingTime()!=0;
     }
 
-    unsigned int maxWaitingTime() const{
-        int maxWaiting = 0;
+    unsigned int sumWaitingTime() const{
+        unsigned int sumWaiting = 0;
         int precedentEnd = std::get<1>(tasks.front());
         bool firstTask = true;
         for (auto t:tasks) {
@@ -73,10 +73,10 @@ public:
             if (firstTask) {firstTask = false;continue;}
             // Si la date de debut de la tâche est différent de la date de fin de la tache précedente
             if (precedentEnd != std::get<0>(t))
-                maxWaiting = (std::get<0>(t) - precedentEnd);
+                sumWaiting += (std::get<0>(t) - precedentEnd);
             precedentEnd = std::get<1>(t);
         }
-        return maxWaiting;
+        return sumWaiting;
     }
 
     void shiftTask(unsigned int shift) {
@@ -91,6 +91,13 @@ public:
         // On replace toutes les tâches
         for (auto t: tmp)
             *this = *this + std::get<2>(t);
+    }
+
+    void clear() {
+        tasks.clear();
+        start = 0;
+        end = 0;
+        sumCjWj = 0;
     }
 };
 #endif //PROJET_MACHINE_HPP
