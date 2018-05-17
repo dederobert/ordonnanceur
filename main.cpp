@@ -12,7 +12,7 @@
 
 #define NB_TACHE 10
 #define NB_INDIVIDU 10
-std::vector<Task> tasks;
+
 
 using namespace std;
 int main() {
@@ -33,7 +33,7 @@ int main() {
 
    std::vector<Chromosome<int>> generation1;
    std::vector<Chromosome<int>*> generation2;
-    Genetique<int>* g = new Genetique<int>();
+    auto * g = new Genetique<int>();
 
     // Choix de l'heuristique (A CHANGER)
     hPJ = new HeuristiqueTriePJ();
@@ -41,6 +41,7 @@ int main() {
     hWJ = new HeuristiqueTrieWJ();
     hPJWJ = new HeuristiqueTriePJWJ();
 
+    std::vector<Task> tasks;
     // Créations de NB_TACHE taches
 
     {
@@ -85,7 +86,7 @@ int main() {
     }
 
     cout << endl << "Generation 2" << endl;
-    std::sort(generation2.begin(), generation2.end(), [](Chromosome<int>* a, Chromosome<int>* b) {
+    std::sort(generation2.begin(), generation2.end(), [tasks](Chromosome<int>* a, Chromosome<int>* b) {
         return evaluateChromosome<int>(*a, tasks) > evaluateChromosome<int>(*b, tasks);
     });
 
