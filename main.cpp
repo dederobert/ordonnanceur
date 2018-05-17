@@ -19,38 +19,12 @@
 
 using namespace std;
 
-int main() {
+int main(int argc, char** argv) {
+    ParameterAnalyzer pa(argc, argv);
     int i = 0;
 
-    // Création des machines et de l'heuristique
-    Machine m1PJ;
-    Machine m2PJ;
-    Machine m1RJ;
-    Machine m2RJ;
-    Machine m1WJ;
-    Machine m2WJ;
-    Machine m1PJWJ;
-    Machine m2PJWJ;
-
-    Heuristique* hPJ;
-    Heuristique* hRJ;
-    Heuristique* hWJ;
-    Heuristique* hPJWJ;
-
-
-    //Création des générations pour l'algo génétique
-    std::vector<Chromosome<int>*> generation1;
-    std::vector<Chromosome<int>*> generationNext;
-    // Création de l'algo génétique
-    auto * g = new Genetique<int>();
-
-    // Choix de l'heuristique (A CHANGER)
-    hPJ = new HeuristiqueTriePJ();
-    hRJ = new HeuristiqueTrieRJ();
-    hWJ = new HeuristiqueTrieWJ();
-    hPJWJ = new HeuristiqueTriePJWJ();
-
     // Créations de NB_TACHE taches
+    if (pa.data["verbose"]) cout << "Création de " << NB_TACHE << " tâches" << endl;
     std::vector<Task> tasks;
     {
         tasks.emplace_back(0,3,3,2);
@@ -64,112 +38,137 @@ int main() {
         tasks.emplace_back(8,5,8,8);
     }
 
-
     // Affichage des tâches
     cout << "Tâche | rj | wj | pj" << endl;
     for (Task task:tasks) {
-        cout << " "<<i++<<"   | " << task.r << " | " << task.w << " | " << task.p << endl;
+        cout << " " << i++ << "   | " << task.r << " | " << task.w << " | " << task.p << endl;
     }
 
 
-    // calcul des heuristiques
-    hPJ->predict(m1PJ, m2PJ, tasks);
-    delete hPJ;
+    if (pa.data["heuristique"]) {
+        // Création des machines et de l'heuristique
+        Machine m1PJ;
+        Machine m2PJ;
+        Machine m1RJ;
+        Machine m2RJ;
+        Machine m1WJ;
+        Machine m2WJ;
+        Machine m1PJWJ;
+        Machine m2PJWJ;
 
-    hWJ->predict(m1WJ, m2WJ, tasks);
-    delete hWJ;
+        Heuristique *hPJ;
+        Heuristique *hRJ;
+        Heuristique *hWJ;
+        Heuristique *hPJWJ;
 
-    hRJ->predict(m1RJ, m2RJ, tasks);
-    delete hRJ;
+        // Choix de l'heuristique (A CHANGER)
+        hPJ = new HeuristiqueTriePJ();
+        hRJ = new HeuristiqueTrieRJ();
+        hWJ = new HeuristiqueTrieWJ();
+        hPJWJ = new HeuristiqueTriePJWJ();
 
-    hPJWJ->predict(m1PJWJ, m2PJWJ, tasks);
-    delete hPJWJ;
+        // calcul des heuristiques
+        hPJ->predict(m1PJ, m2PJ, tasks);
+        delete hPJ;
 
-    //Affichage des machines
-    cout << "Heuristique trie PJ" << endl;
-    cout << "M1:" << m1PJ << endl;
-    cout << "M2:" << m2PJ << endl;
+        hWJ->predict(m1WJ, m2WJ, tasks);
+        delete hWJ;
 
-    cout << "Heuristique trie WJ" << endl;
-    cout << "M1:" << m1WJ << endl;
-    cout << "M2:" << m2WJ << endl;
+        hRJ->predict(m1RJ, m2RJ, tasks);
+        delete hRJ;
 
-    cout << "Heuristique trie RJ" << endl;
-    cout << "M1:" << m1RJ << endl;
-    cout << "M2:" << m2RJ << endl;
+        hPJWJ->predict(m1PJWJ, m2PJWJ, tasks);
+        delete hPJWJ;
 
-    cout << "Heuristique trie PJWJ" << endl;
-    cout << "M1:" << m1PJWJ << endl;
-    cout << "M2:" << m2PJWJ << endl;
+        //Affichage des machines
+        cout << "Heuristique trie PJ" << endl;
+        cout << "M1:" << m1PJ << endl;
+        cout << "M2:" << m2PJ << endl;
 
+        cout << "Heuristique trie WJ" << endl;
+        cout << "M1:" << m1WJ << endl;
+        cout << "M2:" << m2WJ << endl;
 
+        cout << "Heuristique trie RJ" << endl;
+        cout << "M1:" << m1RJ << endl;
+        cout << "M2:" << m2RJ << endl;
+
+        cout << "Heuristique trie PJWJ" << endl;
+        cout << "M1:" << m1PJWJ << endl;
+        cout << "M2:" << m2PJWJ << endl;
+
+    }
 
     /*******************************************\
     *          ALGORITHME GENETIQE             *
     \*******************************************/
-    std::vector<int>indexes = {0, 1, 2, 3, 4, 5, 6, 7, 8};
-    cout << endl << endl << "ALGORITHME GENETIQUE" << endl << endl;
+    if (pa.data["genetique"]) {
+        //Création des générations pour l'algo génétique
+        std::vector<Chromosome<int> *> generation1;
+        std::vector<Chromosome<int> *> generationNext;
+        // Création de l'algo génétique
+        auto *g = new Genetique<int>();
 
-    std::random_device rd;
-    std::mt19937 shuffler(rd());
+        std::vector<int> indexes = {0, 1, 2, 3, 4, 5, 6, 7, 8};
+        cout << endl << endl << "ALGORITHME GENETIQUE" << endl << endl;
 
-    Machine mg1;
-    Machine mg2;
+        std::random_device rd;
+        std::mt19937 shuffler(rd());
 
-    // Création des individu
-    // Pour chaque individu, on place les tâches dans un ordre aléatoire
-    cout << "Generation des individu" << endl;
-    for (i= 0; i < NB_INDIVIDU; i++){
-        std::shuffle(indexes.begin(), indexes.end(), shuffler);
-        generation1.push_back(new Chromosome<int>(indexes));
+        Machine mg1;
+        Machine mg2;
+
+        // Création des individu
+        // Pour chaque individu, on place les tâches dans un ordre aléatoire
+        cout << "Generation des individu" << endl;
+        for (i = 0; i < NB_INDIVIDU; i++) {
+            std::shuffle(indexes.begin(), indexes.end(), shuffler);
+            generation1.push_back(new Chromosome<int>(indexes));
+        }
+
+        for (i = 0; i < NB_GENERATION; i++) {
+            std::shuffle(generation1.begin(), generation1.end(), shuffler);
+            for (int j = 0; j < generation1.size() - 1; j += 2) {
+                generationNext.push_back(g->cross(generation1[j], generation1[j + 1]));
+                generationNext.push_back(g->mutation(generation1[j]));
+                generationNext.push_back(g->mutation(generation1[j + 1]));
+                delete generation1[j];
+                delete generation1[j + 1];
+            }
+            // On trie les individus selont leurs évaluation
+            std::sort(generationNext.begin(), generationNext.end(), [tasks](Chromosome<int> *a, Chromosome<int> *b) {
+                return evaluateChromosome<int>(a, tasks) <= evaluateChromosome<int>(b, tasks);
+            });
+
+            generation1.clear();
+            for (int j = 0; j < NB_INDIVIDU; j++) {
+                generation1.push_back(generationNext[j]);
+            }
+            generationNext.clear();
+
+            if (pa.data["verbose"]){
+                int z = 0;
+                cout << endl << endl << "Generation " << i << endl;
+                for (auto &j : generation1) {
+                    cout << "Individu " << z++ << endl;
+                    cout << "Somme Cj Wj :" << evaluateChromosome<int>(j, tasks) << endl;
+                }
+            }
+        }
+        if (!pa.data["verbose"]) {
+            int z = 0;
+            cout << endl << endl << "Generation " << i << endl;
+            for (auto &j : generation1) {
+                cout << "Individu " << z++ << endl;
+                cout << "Somme Cj Wj :" << evaluateChromosome<int>(j, tasks) << endl;
+            }
+        }
+        if (pa.data["verbose"]) cout << "Le meilleur résultat est " << evaluateChromosome<int>(generation1[0], tasks)
+                                     << endl << "Obtenue avec " << NB_GENERATION
+                                     << " générations sur " << NB_INDIVIDU << " individus";
+
+            // Memory clear
+        delete g;
     }
-
-    for(i=0; i < NB_GENERATION; i++) {
-        std::shuffle(generation1.begin(), generation1.end(), shuffler);
-        for(int j = 0; j < generation1.size()-1; j+=2) {
-            generationNext.push_back(g->cross(generation1[j], generation1[j+1]));
-            generationNext.push_back(g->mutation(generation1[j]));
-            generationNext.push_back(g->mutation(generation1[j+1]));
-            delete generation1[j];
-            delete generation1[j+1];
-        }
-        // On trie les individus selont leurs évaluation
-        std::sort(generationNext.begin(), generationNext.end(), [tasks](Chromosome<int>* a, Chromosome<int>* b) {
-            return evaluateChromosome<int>(a, tasks) <= evaluateChromosome<int>(b, tasks);
-        });
-
-        generation1.clear();
-        for (int j=0;j<NB_INDIVIDU;j++) {
-            generation1.push_back(generationNext[j]);
-        }
-        generationNext.clear();
-
-        cout << "gen size " << generation1.size() << endl;
-
-        int z=0;
-        cout << endl << endl << "Generation " << i << endl;
-        for (auto &j : generation1) {
-            cout << "Individu " <<z++ << endl;
-            cout << "Somme Cj Wj :" << evaluateChromosome<int>(j, tasks) << endl;
-        }
-    }
-
-    // Memory clear
-    delete g;
-
-/*
-    putTaskOnMachine(mg1, mg2, g->Chromosome2Tasks(generation1.back(), tasks));
-    // On test si il y a un wait sur m1 et on décalle
-    if (mg1.isWaiting())
-        mg1.shiftTask(mg1.sumWaitingTime());
-
-    // On test si il y a un wait sur m2 et on décalle
-    if (mg2.isWaiting())
-        mg2.shiftTask(mg2.sumWaitingTime());
-    cout << mg1 << endl;
-    cout << mg2 << endl;
-    mg1.clear();
-    mg2.clear();*/
-
-
+    return EXIT_SUCCESS;
 }
