@@ -6,6 +6,7 @@
 #define PROJET_UTILS_HPP
 
 #include "struct/Machine.hpp"
+#include "genetique/Chromosome.hpp"
 
 template<typename T>
 T max(T v1, T v2) {
@@ -14,7 +15,7 @@ T max(T v1, T v2) {
     return v2;
 }
 
-void putTaskOnMachine(Machine& m1, Machine& m2, std::vector<Task> tasks) {
+void putTaskOnMachine(Machine& m1, Machine& m2,const std::vector<Task>& tasks) {
     // On place toutes les tâches
     for (Task task : tasks) {
         // On test la machine la moins chargé

@@ -10,12 +10,18 @@
 #include "heuristique/HeuristiqueTriePJ.hpp"
 #include "genetique/Genetique.hpp"
 
+// Définie le nombre de taĉhe à générer
 #define NB_TACHE 10
-#define NB_INDIVIDU 10
 
+// Définie le nombre d'individu pour l'algo génétique
+#define NB_INDIVIDU 10
+#define NB_GENERATION 10
 
 using namespace std;
+
 int main() {
+    int i = 0;
+
     // Création des machines et de l'heuristique
     Machine m1PJ;
     Machine m2PJ;
@@ -31,8 +37,11 @@ int main() {
     Heuristique* hWJ;
     Heuristique* hPJWJ;
 
-   std::vector<Chromosome<int>> generation1;
-   std::vector<Chromosome<int>*> generation2;
+
+    //Création des générations pour l'algo génétique
+    std::vector<Chromosome<int>*> generation1;
+    std::vector<Chromosome<int>*> generationNext;
+    // Création de l'algo génétique
     auto * g = new Genetique<int>();
 
     // Choix de l'heuristique (A CHANGER)
@@ -41,9 +50,8 @@ int main() {
     hWJ = new HeuristiqueTrieWJ();
     hPJWJ = new HeuristiqueTriePJWJ();
 
-    std::vector<Task> tasks;
     // Créations de NB_TACHE taches
-
+    std::vector<Task> tasks;
     {
         tasks.emplace_back(0,3,3,2);
         tasks.emplace_back(1,2,6,10);
@@ -56,74 +64,13 @@ int main() {
         tasks.emplace_back(8,5,8,8);
     }
 
-    cout << endl << endl << "ALGORITHME GENETIQUE" << endl << endl;
-    // Création des individu
-    std::vector<int>indexes = {0, 1, 2, 3, 4, 5, 6, 7, 8};
-    std::random_device rd;
-    std::mt19937 shuffler(rd());
-    Machine mg1;
-    Machine mg2;
-
-    cout << "Generation des individue" << endl;
-    for (int i =0;i< NB_INDIVIDU;i++){
-        std::shuffle(indexes.begin(), indexes.end(), shuffler);
-        generation1.emplace_back(indexes);
-    }
-
-    int z=0;
-    cout << "Generation 1" << endl;
-    for(const auto &c:generation1) {
-        cout << "Individu " <<z++ << endl;
-        cout << "Somme Cj Wj :" << evaluateChromosome<int>(c, tasks) << endl;
-    }
-
-    std::shuffle(generation1.begin(), generation1.end(), shuffler);
-    for(int i = 0; i < generation1.size()-1; i+=2) {
-        generation2.push_back(g->cross(generation1[i], generation1[i+1]));
-        generation2.push_back(g->mutation(generation1[i]));
-        generation2.push_back(g->mutation(generation1[i+1]));
-
-    }
-
-    cout << endl << "Generation 2" << endl;
-    std::sort(generation2.begin(), generation2.end(), [tasks](Chromosome<int>* a, Chromosome<int>* b) {
-        return evaluateChromosome<int>(*a, tasks) > evaluateChromosome<int>(*b, tasks);
-    });
-
-    z=0;
-    for(auto c:generation2) {
-        cout << "Individu " <<z++ << endl;
-        cout << "Somme Cj Wj :" << evaluateChromosome(*c, tasks) << endl;
-    }
-
-/*
-    putTaskOnMachine(mg1, mg2, g->Chromosome2Tasks(generation1.back(), tasks));
-    // On test si il y a un wait sur m1 et on décalle
-    if (mg1.isWaiting())
-        mg1.shiftTask(mg1.sumWaitingTime());
-
-    // On test si il y a un wait sur m2 et on décalle
-    if (mg2.isWaiting())
-        mg2.shiftTask(mg2.sumWaitingTime());
-    cout << mg1 << endl;
-    cout << mg2 << endl;
-    mg1.clear();
-    mg2.clear();*/
-
-
-    return 0;
-
-    cout << "Resultat croisement: " << endl;
-    cout << mg1 << endl;
-    cout << mg2 << endl;
-
 
     // Affichage des tâches
     cout << "Tâche | rj | wj | pj" << endl;
-    int i = 0;
     for (Task task:tasks) {
         cout << " "<<i++<<"   | " << task.r << " | " << task.w << " | " << task.p << endl;
     }
+
 
     // calcul des heuristiques
     hPJ->predict(m1PJ, m2PJ, tasks);
@@ -154,5 +101,75 @@ int main() {
     cout << "Heuristique trie PJWJ" << endl;
     cout << "M1:" << m1PJWJ << endl;
     cout << "M2:" << m2PJWJ << endl;
+
+
+
+    /*******************************************\
+    *          ALGORITHME GENETIQE             *
+    \*******************************************/
+    std::vector<int>indexes = {0, 1, 2, 3, 4, 5, 6, 7, 8};
+    cout << endl << endl << "ALGORITHME GENETIQUE" << endl << endl;
+
+    std::random_device rd;
+    std::mt19937 shuffler(rd());
+
+    Machine mg1;
+    Machine mg2;
+
+    // Création des individu
+    // Pour chaque individu, on place les tâches dans un ordre aléatoire
+    cout << "Generation des individu" << endl;
+    for (i= 0; i < NB_INDIVIDU; i++){
+        std::shuffle(indexes.begin(), indexes.end(), shuffler);
+        generation1.push_back(new Chromosome<int>(indexes));
+    }
+
+    for(i=0; i < NB_GENERATION; i++) {
+        std::shuffle(generation1.begin(), generation1.end(), shuffler);
+        for(int j = 0; j < generation1.size()-1; j+=2) {
+            generationNext.push_back(g->cross(generation1[j], generation1[j+1]));
+            generationNext.push_back(g->mutation(generation1[j]));
+            generationNext.push_back(g->mutation(generation1[j+1]));
+            delete generation1[j];
+            delete generation1[j+1];
+        }
+        // On trie les individus selont leurs évaluation
+        std::sort(generationNext.begin(), generationNext.end(), [tasks](Chromosome<int>* a, Chromosome<int>* b) {
+            return evaluateChromosome<int>(a, tasks) <= evaluateChromosome<int>(b, tasks);
+        });
+
+        generation1.clear();
+        for (int j=0;j<NB_INDIVIDU;j++) {
+            generation1.push_back(generationNext[j]);
+        }
+        generationNext.clear();
+
+        cout << "gen size " << generation1.size() << endl;
+
+        int z=0;
+        cout << endl << endl << "Generation " << i << endl;
+        for (auto &j : generation1) {
+            cout << "Individu " <<z++ << endl;
+            cout << "Somme Cj Wj :" << evaluateChromosome<int>(j, tasks) << endl;
+        }
+    }
+
+    // Memory clear
+    delete g;
+
+/*
+    putTaskOnMachine(mg1, mg2, g->Chromosome2Tasks(generation1.back(), tasks));
+    // On test si il y a un wait sur m1 et on décalle
+    if (mg1.isWaiting())
+        mg1.shiftTask(mg1.sumWaitingTime());
+
+    // On test si il y a un wait sur m2 et on décalle
+    if (mg2.isWaiting())
+        mg2.shiftTask(mg2.sumWaitingTime());
+    cout << mg1 << endl;
+    cout << mg2 << endl;
+    mg1.clear();
+    mg2.clear();*/
+
 
 }
