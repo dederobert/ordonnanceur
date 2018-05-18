@@ -35,20 +35,58 @@ class ParameterAnalyzer {
 public:
     ParameterAnalyzer(int argc, char** argv){
         data["verbose"] = false;
-        data["genetique"] = false;
-        data["heuristique"] = false;
+        data["genetique"] = argc == 1;
+        data["heuristique"] = argc == 1;
 
-        for (int i = 0; i < argc; ++i){
+        data["pj"] = argc == 1;
+        data["rj"] = argc == 1;
+        data["wj"] = argc == 1;
+        data["pjwj"] = argc == 1;
+
+        bool precIsHeur = false;
+
+
+        for (int i = 1; i < argc; ++i){
             std::string cmd(argv[i]);
-            if (cmd == "--verbose" || cmd == "-v")
+            if (cmd == "--verbose" || cmd == "-v") {
+            	precIsHeur = false;
                 data["verbose"] = true;
-            else if (cmd == "--genetique" || cmd == "-g")
+            }
+            else if (cmd == "--genetique" || cmd == "-g"){
+            	precIsHeur = false;
                 data["genetique"] = true;
-            else if (cmd == "--heuristique" || cmd == "-h")
+            }
+            else if (cmd == "--heuristique" || cmd == "-h"){
+            	precIsHeur = true;
                 data["heuristique"] = true;
+            }
+            else if (cmd == "rj" && precIsHeur){
+                data["rj"] = true;
+            }
+            else if (cmd == "wj" && precIsHeur){
+                data["wj"] = true;
+            }
+            else if (cmd == "pj" && precIsHeur){
+                data["pj"] = true;
+            }
+            else if (cmd == "pjwj" && precIsHeur){
+                data["pjwj"] = true;
+            }
+            else if (cmd == "all" && precIsHeur){
+            	data["rj"] = true;
+                data["wj"] = true;
+                data["pj"] = true;
+                data["pjwj"] = true;
+            }
+            else if (cmd == "-gh" || cmd == "-hg") {
+            	precIsHeur = true;
+                data["heuristique"] = true;
+                data["genetique"] = true;
+            }
             else if(i != 0) {
-                fprintf(stderr, "Usage: cmd [OPTIONS]\nOPTIONS:\n\t--verbose|-v Mode verbeux\n"
-                        "\t--genetique|-g Utiliser algo genetique\n\t--heuristique|-h Utiliser heuristique\n");
+                fprintf(stderr, "Usage: %s [OPTIONS]\nOPTIONS:\n\t--verbose|-v Mode verbeux\n"
+                        "\t--genetique|-g Utiliser algo genetique"
+                        "\n\t--heuristique=HEURISTIQUE|-h Utiliser la ou les heuristique(s) (pj, rj, wj, pjwj, all)\n",argv[0]);
                 exit(EXIT_FAILURE);
             }
         }
